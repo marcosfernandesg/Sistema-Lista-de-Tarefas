@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema de Tarefas</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-5">
+
+    <h2 class="mb-4 text-center">Sistema de Lista de Tarefas</h2>
+
+    <!-- ================= FORMULÁRIO ================= -->
+
+    <div class="card mb-4">
+        <div class="card-header"
+             th:text="${tarefa.id == null} ? 'Nova Tarefa' : 'Editar Tarefa'">
+        </div>
+
+        <div class="card-body">
+            <form th:action="@{/salvar}"
+                  th:object="${tarefa}"
+                  method="post">
+
+                <input type="hidden" th:field="*{id}" />
+
+                <div class="row">
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Nome</label>
+                        <input type="text"
+                               class="form-control"
+                               th:field="*{nome}"
+                               required>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Custo (R$)</label>
+                        <input type="number"
+                               step="0.01"
+                               class="form-control"
+                               th:field="*{custo}"
+                               required>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Data Limite</label>
+                        <input type="date"
+                               class="form-control"
+                               th:field="*{dataLimite}"
+                               required>
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-end mb-3">
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+                            Salvar
+                        </button>
+                    </div>
+
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= TABELA ================= -->
+
+    <table class="table table-bordered table-striped">
+
+        <thead class="table-dark">
+        <tr>
+            <th>Ordem</th>
+            <th>Nome</th>
+            <th>Custo</th>
+            <th>Data Limite</th>
+            <th style="width: 200px;">Ações</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="t : ${tarefas}"
+            th:classappend="${t.custo >= 1000} ? 'table-warning'">
+
+            <td th:text="${t.ordemApresentacao}"></td>
+            <td th:text="${t.nome}"></td>
+            <td th:text="${#numbers.formatDecimal(t.custo,1,2)}"></td>
+            <td th:text="${#temporals.format(t.dataLimite,'dd/MM/yyyy')}"></td>
+
+            <td class="d-flex gap-2">
+
+                <a th:href="@{/editar/{id}(id=${t.id})}"
+                   class="btn btn-sm btn-primary">
+                    Editar
+                </a>
+
+                <button type="button"
+                        class="btn btn-sm btn-danger"
+                        th:onclick="'confirmarExclusao(' + ${t.id} + ')'">
+                    Excluir
+                </button>
+
+                <a th:href="@{/subir/{id}(id=${t.id})}"
+                   class="btn btn-sm btn-secondary">
+                    ↑
+                </a>
+
+                <a th:href="@{/descer/{id}(id=${t.id})}"
+                   class="btn btn-sm btn-secondary">
+                    ↓
+                </a>
+
+            </td>
+
+        </tr>
+        </tbody>
+
+        <tfoot>
+        <tr>
+            <td colspan="2"><strong>Total:</strong></td>
+            <td th:text="${#numbers.formatDecimal(total,1,2)}"></td>
+            <td colspan="2"></td>
+        </tr>
+        </tfoot>
+
+    </table>
+
+</div>
+
+<!-- ================= JS ================= -->
+
+<script>
+    function confirmarExclusao(id) {
+        if (confirm("Tem certeza que deseja excluir esta tarefa?")) {
+            window.location.href = "/excluir/" + id;
+        }
+    }
+</script>
+
+</body>
+</html>
