@@ -1,106 +1,87 @@
 package com.fatto.sis_tarefas.service;
 
-import com.fatto.sis_tarefas.domain.Tarefas;
+import com.fatto.sis_tarefas.entity.Tarefas;
 import com.fatto.sis_tarefas.repository.TarefasRepository;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class TarefasService {
 
     private final TarefasRepository repository;
+
+    public TarefasService(TarefasRepository repository) {
+        this.repository = repository;
+    }
 
     public List<Tarefas> listarTodas() {
         return repository.findAllByOrderByOrdemApresentacaoAsc();
     }
 
-    public BigDecimal obterTotalCustos() {
-        BigDecimal total = repository.somarCustos();
-        return total != null ? total : BigDecimal.ZERO;
+    public Tarefas salvar(Tarefas tarefa) {
+        return repository.save(tarefa);
     }
 
-    @Transactional
-    public Tarefas criar(Tarefas tarefas) {
-
-        if (repository.existsByNome(tarefas.getNome())) {
-            throw new RuntimeException("Já existe tarefa com esse nome");
-        }
-
-        Integer ultimaOrdem = repository.findMaxOrdem();
-        tarefas.setOrdemApresentacao(
-                ultimaOrdem == null ? 1 : ultimaOrdem + 1
-        );
-
-        return repository.save(tarefas);
-    }
-
-    @Transactional
-    public Tarefas atualizar(Long id, Tarefas novaTarefa) {
-
-        Tarefas existente = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada"));
-
-        if (!existente.getNome().equals(novaTarefa.getNome())
-                && repository.existsByNome(novaTarefa.getNome())) {
-            throw new RuntimeException("Já existe tarefa com esse nome");
-        }
-
-        existente.setNome(novaTarefa.getNome());
-        existente.setCusto(novaTarefa.getCusto());
-        existente.setDataLimite(novaTarefa.getDataLimite());
-
-        return repository.save(existente);
-    }
-
-    @Transactional
-    public void excluir(Long id) {
+    public void deletar(Long id) {
         repository.deleteById(id);
+    }
+
+    public Tarefas buscarPorId(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada"));
+    }
+
+    public BigDecimal obterTotalCustos() {
+        return repository.findAll()
+                .stream()
+                .map(t -> t.getCusto() != null ? t.getCusto() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     @Transactional
     public void subir(Long id) {
 
-        Tarefas atual = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada"));
+        Tarefas atual = buscarPorId(id);
 
-        if (atual.getOrdemApresentacao() == 1) {
-            return;
-        }
+        if (atual.getOrdemApresentacao() == 1) return;
 
-        Tarefas anterior = repository
-                .findByOrdemApresentacao(atual.getOrdemApresentacao() - 1)
-                .orElseThrow();
+        Tarefas anterior =
+                repository.findByOrdemApresentacao(
+                        atual.getOrdemApresentacao() - 1
+                );
+
+        if (anterior == null) return;
 
         int ordemAtual = atual.getOrdemApresentacao();
 
-        atual.setOrdemApresentacao(ordemAtual - 1);
+        atual.setOrdemApresentacao(anterior.getOrdemApresentacao());
         anterior.setOrdemApresentacao(ordemAtual);
+
+        repository.save(anterior);
+        repository.save(atual);
     }
 
     @Transactional
     public void descer(Long id) {
 
-        Tarefas atual = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada"));
+        Tarefas atual = buscarPorId(id);
 
-        Integer maxOrdem = repository.findMaxOrdem();
+        Tarefas proxima =
+                repository.findByOrdemApresentacao(
+                        atual.getOrdemApresentacao() + 1
+                );
 
-        if (atual.getOrdemApresentacao().equals(maxOrdem)) {
-            return;
-        }
-
-        Tarefas proxima = repository
-                .findByOrdemApresentacao(atual.getOrdemApresentacao() + 1)
-                .orElseThrow();
+        if (proxima == null) return;
 
         int ordemAtual = atual.getOrdemApresentacao();
 
-        atual.setOrdemApresentacao(ordemAtual + 1);
+        atual.setOrdemApresentacao(proxima.getOrdemApresentacao());
         proxima.setOrdemApresentacao(ordemAtual);
+
+        repository.save(proxima);
+        repository.save(atual);
     }
 }

@@ -1,49 +1,68 @@
-package com.fatto.sis_tarefas.domain;
+package com.fatto.sis_tarefas.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "tarefas",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = "nome"),
-                @UniqueConstraint(columnNames = "ordem_apresentacao")
-        })
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Table(name = "tarefas")
 public class Tarefas {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    @NotBlank(message = "Nome é obrigatório")
+    @Column(nullable = false)
     private String nome;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    @NotNull(message = "Custo é obrigatório")
-    @DecimalMin(value = "0.0", inclusive = true,
-            message = "Custo deve ser maior ou igual a zero")
-    private BigDecimal custo;
+    @Column(nullable = false)
+    private Integer ordemApresentacao;
 
     @Column(nullable = false)
-    @NotNull(message = "Data limite é obrigatória")
+    private BigDecimal custo;
+
+    @Column(name = "data_limite", nullable = false)
     private LocalDate dataLimite;
 
-    @Column(name = "ordem_apresentacao",
-            nullable = false,
-            unique = true)
-    private Integer ordemApresentacao;
+    // ===== GETTERS E SETTERS =====
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {   // <<< ESSENCIAL PARA EDITAR
+        this.id = id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public Integer getOrdemApresentacao() {
+        return ordemApresentacao;
+    }
+
+    public void setOrdemApresentacao(Integer ordemApresentacao) {
+        this.ordemApresentacao = ordemApresentacao;
+    }
+
+    public BigDecimal getCusto() {
+        return custo;
+    }
+
+    public void setCusto(BigDecimal custo) {
+        this.custo = custo;
+    }
+
+    public LocalDate getDataLimite() {
+        return dataLimite;
+    }
+
+    public void setDataLimite(LocalDate dataLimite) {
+        this.dataLimite = dataLimite;
+    }
 }
