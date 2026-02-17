@@ -20,9 +20,3 @@ A aplicação está disponível online através do Railway:
 - [x] Listagem dinâmica de tarefas cadastradas.
 - [x] Persistência de dados em banco de dados relacional.
 - [x] Interface responsiva com Bootstrap.
-
-## 🔧 Como executar o projeto localmente
-
-1. **Clonar o repositório:**
-   ```bash
-   git clone [https://github.com/marcosfernandesg/Sistema-Lista-de-Tarefas.git](https://github.com/marcosfernandesg/Sistema-Lista-de-Tarefas.git)
