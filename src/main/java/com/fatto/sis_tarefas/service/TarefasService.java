@@ -23,19 +23,24 @@ public class TarefasService {
     }
 
     @Transactional
-    public Tarefas salvar(Tarefas tarefa) {
-        // Validação de Nome Duplicado
+    public void salvar(Tarefas tarefa) {
+        // Validação de Nome Duplicado (Requisito do sistema)
         Optional<Tarefas> tarefaExistente = repository.findByNome(tarefa.getNome());
-        if (tarefaExistente.isPresent() && !tarefaExistente.get().getId().equals(tarefa.getId())) {
-            throw new RuntimeException("Já existe uma tarefa com este nome.");
+
+        // Se achou o nome, verifica se não é o próprio registro sendo editado
+        if (tarefaExistente.isPresent()) {
+            if (tarefa.getId() == null || !tarefa.getId().equals(tarefaExistente.get().getId())) {
+                throw new RuntimeException("Já existe uma tarefa com este nome.");
+            }
         }
 
-        // Se for uma nova tarefa, define a ordem como a última
+        // Se for inclusão (ID nulo), define a ordem como a última + 1
         if (tarefa.getId() == null) {
-            tarefa.setOrdemApresentacao(repository.findMaxOrdem() + 1);
+            Integer proximaOrdem = repository.findMaxOrdem() + 1;
+            tarefa.setOrdemApresentacao(proximaOrdem);
         }
 
-        return repository.save(tarefa);
+        repository.save(tarefa);
     }
 
     public void deletar(Long id) {
@@ -57,13 +62,13 @@ public class TarefasService {
     @Transactional
     public void subir(Long id) {
         Tarefas atual = buscarPorId(id);
-        if (atual.getOrdemApresentacao() <= 1) return; // Não sobe se for a primeira [cite: 103]
+        if (atual.getOrdemApresentacao() <= 1) return;
 
         Tarefas anterior = repository.findByOrdemApresentacao(atual.getOrdemApresentacao() - 1);
         if (anterior != null) {
-            int ordemAtual = atual.getOrdemApresentacao();
+            int ordemTemp = atual.getOrdemApresentacao();
             atual.setOrdemApresentacao(anterior.getOrdemApresentacao());
-            anterior.setOrdemApresentacao(ordemAtual);
+            anterior.setOrdemApresentacao(ordemTemp);
             repository.save(anterior);
             repository.save(atual);
         }
@@ -74,10 +79,10 @@ public class TarefasService {
         Tarefas atual = buscarPorId(id);
         Tarefas proxima = repository.findByOrdemApresentacao(atual.getOrdemApresentacao() + 1);
 
-        if (proxima != null) { // Não desce se for a última [cite: 103]
-            int ordemAtual = atual.getOrdemApresentacao();
+        if (proxima != null) {
+            int ordemTemp = atual.getOrdemApresentacao();
             atual.setOrdemApresentacao(proxima.getOrdemApresentacao());
-            proxima.setOrdemApresentacao(ordemAtual);
+            proxima.setOrdemApresentacao(ordemTemp);
             repository.save(proxima);
             repository.save(atual);
         }
