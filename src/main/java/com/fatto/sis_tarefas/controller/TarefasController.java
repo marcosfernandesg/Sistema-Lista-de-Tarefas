@@ -5,6 +5,7 @@ import com.fatto.sis_tarefas.service.TarefasService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/")
@@ -20,21 +21,31 @@ public class TarefasController {
     public String listar(Model model) {
         model.addAttribute("tarefas", service.listarTodas());
         model.addAttribute("total", service.obterTotalCustos());
-        model.addAttribute("novaTarefa", new Tarefas());
+        // Se nao houver uma tarefa de edicao no model, cria uma nova
+        if (!model.containsAttribute("novaTarefa")) {
+            model.addAttribute("novaTarefa", new Tarefas());
+        }
         return "lista";
     }
 
     @PostMapping("/salvar")
-    public String salvar(@ModelAttribute Tarefas tarefa) {
-        service.salvar(tarefa);
+    public String salvar(@ModelAttribute Tarefas tarefa, RedirectAttributes redirectAttributes) {
+        try {
+            service.salvar(tarefa);
+        } catch (RuntimeException e) {
+            // Se der erro de nome duplicado, manda a mensagem de volta
+            redirectAttributes.addFlashAttribute("erro", e.getMessage());
+            redirectAttributes.addFlashAttribute("novaTarefa", tarefa);
+        }
         return "redirect:/";
     }
 
     @GetMapping("/editar/{id}")
     public String editar(@PathVariable Long id, Model model) {
+        Tarefas tarefa = service.buscarPorId(id);
         model.addAttribute("tarefas", service.listarTodas());
         model.addAttribute("total", service.obterTotalCustos());
-        model.addAttribute("novaTarefa", service.buscarPorId(id));
+        model.addAttribute("novaTarefa", tarefa); // Aqui preenche o form para editar
         return "lista";
     }
 

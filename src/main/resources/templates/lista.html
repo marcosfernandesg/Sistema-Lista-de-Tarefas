@@ -45,16 +45,21 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="t : ${tarefas}" th:classappend="${t.custo >= 1000} ? 'custo-alto' : ''">
+        <tr th:each="t : ${tarefas}"
+            th:classappend="${t.custo != null and t.custo.compareTo(T(java.math.BigDecimal).valueOf(1000)) >= 0} ? 'custo-alto' : ''">
+
             <td th:text="${t.ordemApresentacao}"></td>
             <td th:text="${t.nome}"></td>
-            <td th:text="${#numbers.formatCurrency(t.custo)}"></td> <td th:text="${#temporals.format(t.dataLimite, 'dd/MM/yyyy')}"></td> <td>
-            <a th:href="@{/subir/{id}(id=${t.id})}" class="btn btn-sm btn-outline-secondary">↑</a>
-            <a th:href="@{/descer/{id}(id=${t.id})}" class="btn btn-sm btn-outline-secondary">↓</a>
-            <a th:href="@{/editar/{id}(id=${t.id})}" class="btn btn-sm btn-warning">Editar</a>
-            <a th:href="@{/deletar/{id}(id=${t.id})}"
-               class="btn btn-sm btn-danger"
-               onclick="return confirm('Deseja realmente excluir esta tarefa?');">Excluir</a> </td>
+            <td th:text="${#numbers.formatCurrency(t.custo)}"></td>
+            <td th:text="${#temporals.format(t.dataLimite, 'dd/MM/yyyy')}"></td>
+            <td>
+                <a th:href="@{/subir/{id}(id=${t.id})}" class="btn btn-sm btn-outline-secondary">↑</a>
+                <a th:href="@{/descer/{id}(id=${t.id})}" class="btn btn-sm btn-outline-secondary">↓</a>
+                <a th:href="@{/editar/{id}(id=${t.id})}" class="btn btn-sm btn-warning">Editar</a>
+                <a th:href="@{/deletar/{id}(id=${t.id})}"
+                   class="btn btn-sm btn-danger"
+                   onclick="return confirm('Deseja realmente excluir esta tarefa?');">Excluir</a>
+            </td>
         </tr>
         </tbody>
         <tfoot>
