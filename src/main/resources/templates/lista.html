@@ -17,34 +17,37 @@
 
     <div th:if="${erro}" class="alert alert-danger" th:text="${erro}"></div>
 
-    <div class="card card-body mb-4">
+    <div class="card card-body mb-4 shadow-sm">
         <form th:action="@{/salvar}" th:object="${novaTarefa}" method="post" class="row g-3">
             <input type="hidden" th:field="*{id}">
             <input type="hidden" th:field="*{ordemApresentacao}">
 
             <div class="col-md-4">
-                <input type="text" th:field="*{nome}" class="form-control" placeholder="Nome da Tarefa" required>
-            </div>
-
-            <div class="col-md-2">
-                <input type="number" step="0.01" min="0" th:field="*{custo}" class="form-control" placeholder="Custo (R$)" required>
+                <label class="form-label">Nome da Tarefa</label>
+                <input type="text" th:field="*{nome}" class="form-control" placeholder="Ex: Estudar Spring" required>
             </div>
 
             <div class="col-md-3">
+                <label class="form-label">Custo (R$)</label>
+                <input type="number" step="0.01" min="0" th:field="*{custo}" class="form-control" placeholder="0.00" required>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Data Limite</label>
                 <input type="date" th:field="*{dataLimite}" class="form-control" required>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-2 d-flex align-items-end">
                 <button type="submit" class="btn w-100"
                         th:classappend="${novaTarefa.id != null} ? 'btn-success' : 'btn-primary'"
-                        th:text="${novaTarefa.id != null} ? 'Salvar Alterações' : 'Incluir Tarefa'">
+                        th:text="${novaTarefa.id != null} ? 'Salvar' : 'Incluir'">
                 </button>
             </div>
         </form>
     </div>
 
-    <table class="table table-bordered bg-white">
-        <thead class="table-dark">
+    <table class="table table-bordered bg-white shadow-sm">
+        <thead class="table-dark text-center">
         <tr>
             <th>Ordem</th>
             <th>Nome</th>
@@ -55,27 +58,27 @@
         </thead>
         <tbody>
         <tr th:each="t : ${tarefas}"
-            th:classappend="${t.custo != null and t.custo.compareTo(T(java.math.BigDecimal).valueOf(1000)) >= 0} ? 'custo-alto' : ''">
+            th:classappend="${t.custo != null and t.custo.compareTo(new java.math.BigDecimal('1000')) >= 0} ? 'custo-alto' : ''">
 
-            <td th:text="${t.ordemApresentacao}"></td>
+            <td th:text="${t.ordemApresentacao}" class="text-center"></td>
             <td th:text="${t.nome}"></td>
             <td th:text="${#numbers.formatCurrency(t.custo)}"></td>
-            <td th:text="${#temporals.format(t.dataLimite, 'dd/MM/yyyy')}"></td>
-            <td>
+            <td th:text="${#temporals.format(t.dataLimite, 'dd/MM/yyyy')}" class="text-center"></td>
+            <td class="text-center">
                 <a th:href="@{/subir/{id}(id=${t.id})}" class="btn btn-sm btn-outline-secondary">↑</a>
                 <a th:href="@{/descer/{id}(id=${t.id})}" class="btn btn-sm btn-outline-secondary">↓</a>
 
-                <a th:href="@{/editar/{id}(id=${t.id})}" class="btn btn-sm btn-warning">Editar</a>
+                <a th:href="@{/editar/{id}(id=${t.id})}" class="btn btn-sm btn-warning mx-1">Editar</a>
 
                 <a th:href="@{/deletar/{id}(id=${t.id})}"
                    class="btn btn-sm btn-danger"
-                   onclick="return confirm('Deseja realmente excluir esta tarefa?');">Excluir</a>
+                   onclick="return confirm('Deseja excluir esta tarefa?');">Excluir</a>
             </td>
         </tr>
         </tbody>
         <tfoot>
         <tr class="table-secondary">
-            <td colspan="2"><strong>Total de Custos</strong></td>
+            <td colspan="2"><strong>Total</strong></td>
             <td colspan="3"><strong th:text="${#numbers.formatCurrency(total)}"></strong></td>
         </tr>
         </tfoot>
