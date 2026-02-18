@@ -20,3 +20,5 @@ A aplicação está disponível online através do Railway:
 - [x] Listagem dinâmica de tarefas cadastradas.
 - [x] Persistência de dados em banco de dados relacional.
 - [x] Interface responsiva com Bootstrap.
+
+Feito por Marcos Guilherme
